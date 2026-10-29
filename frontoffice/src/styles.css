@@ -1,0 +1,176 @@
+/* ZoemiApp · front office
+   Diseño pensado para niños con motricidad fina limitada:
+   objetivos de toque grandes, mucho contraste y textos simples. */
+:root {
+  --ink: #10233f;
+  --ground: #f3f8ff;
+  --blue: #1d4ed8;
+  --muted: #2b4468;
+  --line: #afc3dd;
+  --ok-bg: #cfe5ff;
+  --bad-bg: #ffe3cc;
+  --bad: #c2410c;
+  --yellow: #ffd166;
+  --radius: 24px;
+  --border: 4px solid var(--ink);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: none;
+}
+
+button, a { font: inherit; color: inherit; text-decoration: none; cursor: pointer; }
+button:disabled { cursor: default; opacity: 0.4; }
+img { -webkit-user-drag: none; }
+
+:focus-visible { outline: 5px solid var(--blue); outline-offset: 3px; }
+
+/* ---------- Estructura ---------- */
+.screen {
+  min-height: 100dvh;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.screen-header { display: flex; gap: 12px; height: 72px; flex: none; }
+.screen-header h1 {
+  flex: 1; margin: 0; display: flex; align-items: center; justify-content: center;
+  border: var(--border); border-radius: 22px;
+  font-size: clamp(24px, 5vw, 36px); font-weight: 800; line-height: 1; text-align: center; padding: 0 12px;
+}
+.icon-btn {
+  width: 72px; height: 72px; flex: none; display: flex; align-items: center; justify-content: center;
+  background: #fff; border: var(--border); border-radius: 22px;
+}
+
+.home-header { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; }
+.home-header h1 { margin: 0; font-size: clamp(34px, 7vw, 56px); line-height: 1.05; font-weight: 800; }
+.wordmark { margin: 0 0 6px; font-size: clamp(30px, 6vw, 40px); font-weight: 800; line-height: 1; color: var(--blue); }
+.muted { margin: 0; font-size: clamp(20px, 4vw, 28px); color: var(--muted); }
+
+/* ---------- Mosaicos ---------- */
+.tiles {
+  flex: 1; display: grid; gap: 16px; align-content: start;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+.tiles-two { align-content: center; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+
+.tile {
+  min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  padding: 16px; text-align: center; border: 5px solid var(--ink); border-radius: 36px; color: var(--ink);
+  font-size: clamp(28px, 5vw, 40px); font-weight: 800; line-height: 1;
+}
+.tile-big { min-height: 300px; font-size: clamp(32px, 6vw, 46px); }
+.tile:active { transform: scale(0.98); }
+
+/* ---------- Botones ---------- */
+.btn {
+  min-height: 72px; padding: 0 24px; display: flex; align-items: center; justify-content: center; gap: 10px;
+  border: var(--border); border-radius: 22px; font-size: 28px; font-weight: 800; line-height: 1;
+}
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-white { background: #fff; color: var(--ink); }
+.btn-yellow { background: var(--yellow); color: var(--ink); }
+.btn-wide { flex: 1; min-height: 88px; font-size: 32px; border-radius: 26px; }
+
+.state-message {
+  margin: 0; padding: 16px 20px; background: #fff; border: 3px solid var(--line); border-radius: 18px;
+  font-size: 24px; font-weight: 800; text-align: center;
+}
+.state-error { background: var(--bad-bg); border-color: var(--bad); }
+
+/* ---------- Pregunta ---------- */
+.question-card {
+  flex: none; background: #fff; border: var(--border); border-radius: var(--radius);
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 12px;
+}
+.question-text { margin: 0; font-size: clamp(26px, 5vw, 38px); line-height: 1.12; font-weight: 800; }
+.question-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.question-actions .btn { min-height: 64px; flex: 1 1 160px; font-size: 26px; }
+
+.feedback {
+  flex: none; min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: #fff; border: 3px solid var(--ink); border-radius: 18px; font-size: 26px; font-weight: 800;
+}
+.feedback-ok { background: var(--ok-bg); border-color: var(--blue); }
+.feedback-ok svg { color: var(--blue); }
+.feedback-retry { background: var(--bad-bg); border-color: var(--bad); }
+.feedback-retry svg { color: var(--bad); }
+
+.quiz-options { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+@media (min-width: 760px) { .quiz-options { flex-direction: row; } }
+
+.option {
+  position: relative; flex: 1; min-height: 120px; padding: 10px; display: flex; align-items: center; justify-content: center;
+  background: #fff; border: 5px solid var(--ink); border-radius: var(--radius); overflow: hidden;
+}
+.option img { max-width: 100%; max-height: 100%; min-height: 0; object-fit: contain; pointer-events: none; }
+.option-text { font-size: clamp(64px, 14vw, 110px); line-height: 1; font-weight: 800; }
+.option-right { background: var(--ok-bg); border-color: var(--blue); }
+.option-wrong { background: var(--bad-bg); border-color: var(--bad); }
+.badge {
+  position: absolute; top: 8px; right: 8px; width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.badge-ok { background: var(--blue); color: #fff; }
+.badge-bad { background: #f97316; color: var(--ink); }
+
+.quiz-nav { flex: none; display: flex; gap: 12px; }
+.btn-prev { width: 104px; padding: 0; }
+.btn-next { flex: 1; font-size: 32px; }
+
+/* ---------- Haz ruido ---------- */
+.stage {
+  position: relative; flex: 1; min-height: 240px; overflow: hidden; background: #fff;
+  border: var(--border); border-radius: 28px; display: flex; align-items: center; justify-content: center;
+}
+.stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; will-change: transform; pointer-events: none; }
+.stage-win {
+  position: absolute; left: 16px; right: 16px; bottom: 16px; min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: var(--ok-bg); border: 4px solid var(--blue); border-radius: 18px; font-size: 28px; font-weight: 800;
+}
+.stage-win svg { color: #b7791f; }
+.meter { flex: none; display: flex; gap: 10px; height: 32px; }
+.meter-seg { flex: 1; border: 3px solid var(--ink); border-radius: 12px; background: #fff; }
+.meter-seg.on { background: var(--blue); }
+.noise-controls, .karaoke-controls { flex: none; display: flex; gap: 12px; }
+.noise-controls .btn:not(.btn-wide), .karaoke-controls .btn:not(.btn-wide) { width: 96px; min-height: 88px; padding: 0; }
+.sens { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 20px; font-weight: 800; color: var(--muted); }
+.chip {
+  min-height: 48px; padding: 0 18px; border: 3px solid var(--ink); border-radius: 14px; background: #fff; font-size: 20px; font-weight: 800;
+}
+.chip-on { background: var(--yellow); }
+
+/* ---------- Karaoke ---------- */
+.lyrics {
+  flex: 1; min-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 8px 0;
+}
+.line {
+  margin: 0; padding: 14px 12px; text-align: center; background: #fff; color: var(--muted);
+  border: 3px solid var(--line); border-radius: 20px; font-size: clamp(24px, 5vw, 32px); line-height: 1.1; font-weight: 800;
+}
+.line-current {
+  background: #ffa8c8; color: var(--ink); border: 5px solid var(--ink); font-size: clamp(30px, 6vw, 42px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  .tile:active { transform: none; }
+}
