@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { FileField } from '../components/FileField'
 import { Banner, Card, Choice, PageHeader } from '../components/ui'
 import { errorMessage, useAsync } from '../lib/hooks'
-import { publicUrl } from '../lib/storage'
+import { publicUrl, removeMedia, unusedPaths } from '../lib/storage'
 import { supabase } from '../lib/supabase'
 import type { Origin, SongLineRow, SongRow } from '../types'
 import { ORIGIN_LABEL } from './Songs'
@@ -106,6 +106,8 @@ export default function SongForm() {
       const rows = lines.map((l, i) => ({ song_id: songId, position: i, text: l.text.trim(), start_seconds: l.start ?? 0 }))
       const { error: le } = await supabase.from('song_lines').insert(rows)
       if (le) throw le
+      const old = existing.data
+      if (old) await removeMedia(unusedPaths([old.song.audio_path], [audio]))
       if (editing) navigate('/karaoke')
       else {
         setSaved(true)

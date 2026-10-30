@@ -4,6 +4,7 @@ import { ScreenHeader } from '../components/ScreenHeader'
 import { StateMessage } from '../components/StateMessage'
 import { UiIcon } from '../components/icons'
 import { getQuestions, getSections, mediaUrl, prefetchMedia } from '../lib/api'
+import { playFail, playSuccess } from '../lib/feedbackSounds'
 import { useAsync, useAudioPlayer } from '../lib/hooks'
 import { shuffle } from '../lib/shuffle'
 import type { Question } from '../types'
@@ -78,8 +79,13 @@ function QuizRunner({ questions }: { questions: Question[] }) {
 
   const choose = (id: string, correct: boolean) => {
     if (done) return
-    if (correct) setDone(true)
-    else if (!wrong.includes(id)) setWrong([...wrong, id])
+    if (correct) {
+      setDone(true)
+      playSuccess()
+    } else if (!wrong.includes(id)) {
+      setWrong([...wrong, id])
+      playFail()
+    }
   }
 
   const retry = !done && wrong.length > 0

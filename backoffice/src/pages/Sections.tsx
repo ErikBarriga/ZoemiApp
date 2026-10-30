@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Banner, Card, PageHeader } from '../components/ui'
 import { errorMessage, useAsync } from '../lib/hooks'
+import { removeMedia } from '../lib/storage'
 import { supabase } from '../lib/supabase'
 import type { Section } from '../types'
 
@@ -45,7 +46,19 @@ export default function Sections() {
 
   const remove = async (s: Section) => {
     if (!window.confirm(`¿Borrar la sección “${s.name}”? También se borrarán todas sus preguntas.`)) return
+    // Se leen los archivos antes de borrar: preguntas y opciones se eliminan en cascada.
+    const { data: qs } = await supabase.from('questions').select('id,audio_path,sound_path').eq('section_id', s.id)
+    const questions = (qs ?? []) as { id: string; audio_path: string | null; sound_path: string | null }[]
+    const { data: opts } = questions.length
+      ? await supabase.from('question_options').select('image_path').in('question_id', questions.map((q) => q.id))
+      : { data: [] }
     const { error } = await supabase.from('sections').delete().eq('id', s.id)
+    if (!error) {
+      await removeMedia([
+        ...questions.flatMap((q) => [q.audio_path, q.sound_path]),
+        ...((opts ?? []) as { image_path: string | null }[]).map((o) => o.image_path)
+      ])
+    }
     setMsg(error ? errorMessage(error) : null)
     sections.reload()
   }

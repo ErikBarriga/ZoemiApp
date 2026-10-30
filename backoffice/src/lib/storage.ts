@@ -44,3 +44,23 @@ export async function uploadMedia(file: File, kind: 'image' | 'audio'): Promise<
   if (error) throw error
   return path
 }
+
+/** Rutas de `before` que ya no están en `after` (archivos que quedaron sin uso). */
+export function unusedPaths(before: (string | null)[], after: (string | null)[]): string[] {
+  const keep = new Set(after)
+  return before.filter((p): p is string => Boolean(p) && !keep.has(p))
+}
+
+/**
+ * Borra archivos del bucket "media". Se llama DESPUÉS de que la base de datos confirmó el cambio.
+ * Si falla no interrumpe nada: a lo más queda un archivo sin uso.
+ */
+export async function removeMedia(paths: (string | null | undefined)[]): Promise<void> {
+  const list = [...new Set(paths.filter((p): p is string => Boolean(p)))]
+  if (list.length === 0) return
+  try {
+    await supabase.storage.from('media').remove(list)
+  } catch {
+    /* sin acciones: el borrado es una limpieza, no parte del guardado */
+  }
+}

@@ -4,7 +4,7 @@ import { FileField } from '../components/FileField'
 import { Banner, Card, Choice, PageHeader } from '../components/ui'
 import { errorMessage, useAsync } from '../lib/hooks'
 import { revealStyle } from '../lib/reveal'
-import { publicUrl } from '../lib/storage'
+import { publicUrl, removeMedia, unusedPaths } from '../lib/storage'
 import { supabase } from '../lib/supabase'
 import type { Direction, Effect, NoiseRow } from '../types'
 import { DIRECTION_LABEL } from './NoiseList'
@@ -68,6 +68,8 @@ export default function NoiseForm() {
         ? await supabase.from('noise_activities').update(payload).eq('id', id!)
         : await supabase.from('noise_activities').insert(payload)
       if (e) throw e
+      const old = existing.data
+      if (old) await removeMedia(unusedPaths([old.audio_path, old.image_path], [audio, image]))
       if (editing) navigate('/ruido')
       else {
         setSaved(true)

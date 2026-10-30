@@ -33,11 +33,9 @@ async function resolveStage(): Promise<{ stage: Stage; email: string | null }> {
   const { data: row } = await supabase.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle()
   if (!row) return { stage: 'notAdmin', email }
 
-  // 2) ¿Ya verificó el segundo paso (aal2)?
-  const { data: aal, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-  if (error || !aal) return { stage: 'signedOut', email }
-  if (aal.currentLevel === 'aal2') return { stage: 'ready', email }
-  return { stage: aal.nextLevel === 'aal2' ? 'needMfaCode' : 'needMfaEnroll', email }
+  // 2) Segundo paso (aal2) DESACTIVADO temporalmente para desarrollo local.
+  //    Para reactivarlo, vuelve a poner la verificación de aal2 y la condición en is_admin() (schema.sql).
+  return { stage: 'ready', email }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

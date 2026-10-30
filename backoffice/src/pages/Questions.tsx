@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Banner, PageHeader } from '../components/ui'
 import { errorMessage, useAsync } from '../lib/hooks'
+import { removeMedia } from '../lib/storage'
 import { supabase } from '../lib/supabase'
 import type { QuestionRow, Section } from '../types'
 
@@ -34,7 +35,12 @@ export default function Questions() {
   }
   const remove = async (q: QuestionRow) => {
     if (!window.confirm(`¿Borrar la pregunta “${q.text}”? Esta acción no se puede deshacer.`)) return
+    // Se leen las imágenes antes de borrar: las opciones se eliminan en cascada.
+    const { data: opts } = await supabase.from('question_options').select('image_path').eq('question_id', q.id)
     const { error } = await supabase.from('questions').delete().eq('id', q.id)
+    if (!error) {
+      await removeMedia([q.audio_path, q.sound_path, ...((opts ?? []) as { image_path: string | null }[]).map((o) => o.image_path)])
+    }
     setMsg(error ? errorMessage(error) : null)
     questions.reload()
   }

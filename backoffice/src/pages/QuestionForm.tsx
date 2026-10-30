@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { FileField } from '../components/FileField'
 import { Banner, Card, Choice, PageHeader } from '../components/ui'
 import { errorMessage, useAsync } from '../lib/hooks'
+import { removeMedia, unusedPaths } from '../lib/storage'
 import { supabase } from '../lib/supabase'
 import type { OptionRow, QuestionRow, Section } from '../types'
 
@@ -111,6 +112,17 @@ export default function QuestionForm() {
       }))
       const { error: oe } = await supabase.from('question_options').insert(rows)
       if (oe) throw oe
+
+      // Ya guardado: borra del almacenamiento lo que se reemplazó o quitó.
+      const d = existing.data
+      if (d) {
+        await removeMedia(
+          unusedPaths(
+            [d.question.audio_path, d.question.sound_path, ...d.options.map((o) => o.image_path)],
+            [audio, sound, ...options.map((o) => o.image)]
+          )
+        )
+      }
 
       if (editing) {
         navigate('/preguntas')

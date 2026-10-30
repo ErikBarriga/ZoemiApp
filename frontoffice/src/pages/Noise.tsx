@@ -11,6 +11,11 @@ type Sensitivity = 'low' | 'mid' | 'high'
 // Volumen mínimo (RMS) para contar como "ruido". "high" = detecta voces suaves.
 const THRESHOLD: Record<Sensitivity, number> = { low: 0.06, mid: 0.03, high: 0.015 }
 const SENS_LABEL: Record<Sensitivity, string> = { low: 'Fuerte', mid: 'Normal', high: 'Suave' }
+// Velocidad (avance por segundo) al subir y al bajar, y cuánto se sigue contando como "ruido"
+// después de un pico: así las pausas entre sílabas no frenan la animación.
+const RISE = 2.2
+const FALL = 0.25
+const HOLD_MS = 300
 
 export default function Noise() {
   const { data, error, loading } = useAsync(getNoiseActivities, [])
@@ -34,9 +39,20 @@ function NoiseRunner({ activities }: { activities: NoiseActivity[] }) {
   const { play } = useAudioPlayer()
   const activity = activities[idx]
   const progressRef = useRef(0)
+  const lastLoudRef = useRef(0)
+  const preloaded = useRef<HTMLImageElement[]>([])
 
   useEffect(() => {
     void prefetchMedia(activities.flatMap((a) => [mediaUrl(a.audio_path), mediaUrl(a.image_path)]))
+    // Imágenes ya decodificadas en memoria: aparecen al instante al cambiar de actividad.
+    preloaded.current = activities.flatMap((a) => {
+      const url = mediaUrl(a.image_path)
+      if (!url) return []
+      const im = new Image()
+      im.crossOrigin = 'anonymous'
+      im.src = url
+      return [im]
+    })
   }, [activities])
 
   useEffect(() => {
@@ -54,8 +70,9 @@ function NoiseRunner({ activities }: { activities: NoiseActivity[] }) {
       const dt = Math.min(0.1, (now - last) / 1000)
       last = now
       const v = mic.read()
-      const loud = v > THRESHOLD[sens]
-      const p = progressRef.current + (loud ? dt * 0.9 : -dt * 0.35)
+      if (v > THRESHOLD[sens]) lastLoudRef.current = now
+      const loud = now - lastLoudRef.current < HOLD_MS
+      const p = progressRef.current + (loud ? dt * RISE : -dt * FALL)
       progressRef.current = Math.max(0, Math.min(1, p))
       setVolume(v)
       setProgress(progressRef.current)

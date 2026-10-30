@@ -41,7 +41,7 @@ export function FileField({ label, kind, path, onChange, help, compact }: Props)
           {kind === 'image' ? (
             <img src={url} alt="" className="file-thumb" />
           ) : (
-            <audio src={url} controls preload="none" className="file-audio" />
+            <audio src={url} controls preload="metadata" className="file-audio" />
           )}
           <span className="file-name">{path.split('/').pop()}</span>
           <button type="button" className="btn btn-secondary" onClick={() => onChange(null)}>

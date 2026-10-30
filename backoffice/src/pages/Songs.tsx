@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Banner, PageHeader } from '../components/ui'
 import { errorMessage, useAsync } from '../lib/hooks'
+import { removeMedia } from '../lib/storage'
 import { supabase } from '../lib/supabase'
 import type { Origin, SongRow } from '../types'
 
@@ -27,6 +28,7 @@ export default function Songs() {
   const remove = async (s: SongRow) => {
     if (!window.confirm(`¿Borrar la canción “${s.title}”?`)) return
     const { error } = await supabase.from('songs').delete().eq('id', s.id)
+    if (!error) await removeMedia([s.audio_path])
     setMsg(error ? errorMessage(error) : null)
     songs.reload()
   }

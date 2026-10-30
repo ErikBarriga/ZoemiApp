@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Banner, PageHeader } from '../components/ui'
 import { errorMessage, useAsync } from '../lib/hooks'
-import { publicUrl } from '../lib/storage'
+import { publicUrl, removeMedia } from '../lib/storage'
 import { supabase } from '../lib/supabase'
 import type { NoiseRow } from '../types'
 
@@ -30,6 +30,7 @@ export default function NoiseList() {
   const remove = async (n: NoiseRow) => {
     if (!window.confirm(`¿Borrar la actividad “${n.text}”?`)) return
     const { error } = await supabase.from('noise_activities').delete().eq('id', n.id)
+    if (!error) await removeMedia([n.audio_path, n.image_path])
     setMsg(error ? errorMessage(error) : null)
     items.reload()
   }
